@@ -9,13 +9,13 @@ This repository provides a structured approach to modeling component-based syste
 ## Repository Structure
 
 - **models/**
-  - `simple_model.json`: A basic model demonstrating a single processor with a feedback loop.
-  - `control_loop_model.json`: A model illustrating a closed-loop control system with a plant, controller, and sensor.
-  - `game_model.json`: A model representing a two-player game with strategies and payoffs.
+  - [x] `simple_model.json`: A basic model demonstrating a single processor with a feedback loop.
+  - [x] `control_loop_model.json`: A model illustrating a closed-loop control system with a plant, controller, and sensor.
+  - [x] `game_model.json`: A model representing a two-player game with strategies and payoffs.
 
 - **tools/**
-  - `check_closed_loop.py`: A script to verify if a given block diagram model is fully closed-loop.
-  - `visualize_model.py`: A script to generate visual representations of block diagram models.
+  - [ ] `check_closed_loop.py`: A script to verify if a given block diagram model is fully closed-loop.
+  - [ ] `visualize_model.py`: A script to generate visual representations of block diagram models.
 
 ## Table of Contents
 
@@ -36,9 +36,18 @@ This repository provides a structured approach to modeling component-based syste
     - [Example Model 1: Simple Dynamical System Plant](#example-model-1-simple-dynamical-system-plant)
       - [Model Concrete Components](#model-concrete-components)
       - [**JSON Representation**](#json-representation)
-    - [**Step 2: Define the Concrete Example Model**](#step-2-define-the-concrete-example-model)
-      - [**Example Model (`game_model.json`)**](#example-model-game_modeljson)
-    - [**Explanation**](#explanation)
+    - [Example Model 2: Closing the Control Loop](#example-model-2-closing-the-control-loop)
+  - [Example 2: Closing the Control Loop](#example-2-closing-the-control-loop)
+    - [**Mathematical Representation**](#mathematical-representation)
+    - [**Conceptual Diagram**](#conceptual-diagram)
+      - [Concrete Components](#concrete-components)
+      - [**JSON Representation**](#json-representation-1)
+  - [Building Games](#building-games)
+    - [Step 1: Add "Game" Block to the Component Library](#step-1-add-game-block-to-the-component-library)
+      - [Library Update (`component_library.json`)](#library-update-component_libraryjson)
+    - [Step 2: Define the Concrete Example Model](#step-2-define-the-concrete-example-model)
+      - [Example Model (`game_model.json`)](#example-model-game_modeljson)
+    - [Explanation](#explanation)
 
 
 ## Conceptual Framework
@@ -301,10 +310,10 @@ In this section we will create a new Block called "Game" then use the existing c
 
 ---
 
-### **Step 1: Add "Game" Block to the Component Library**
+### Step 1: Add "Game" Block to the Component Library
 This is an **abstract block** that goes into **`component_library.json`**.
 
-#### **Library Update (`component_library.json`)**
+#### Library Update (`component_library.json`)
 ```json
 {
   "ID": "Game",
@@ -321,10 +330,10 @@ This defines:
 
 ---
 
-### **Step 2: Define the Concrete Example Model**
+### Step 2: Define the Concrete Example Model
 This **instantiates processors** and **connects them via wires** to form a **game interaction**.
 
-#### **Example Model (`game_model.json`)**
+#### Example Model (`game_model.json`)
 ```json
 {
   "processors": [
@@ -413,7 +422,7 @@ This **instantiates processors** and **connects them via wires** to form a **gam
 
 ---
 
-### **Explanation**
+### Explanation
 This forms a **closed-loop game** where:
 - **The "Game" processor** takes **two inputs (U, U) → two outputs (Y, Y)**.
 - **Alice and Bob each have**:
