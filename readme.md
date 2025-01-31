@@ -427,6 +427,7 @@ This **instantiates processors** and **connects them via wires** to form a **gam
       "Source": ["game", 1],
       "Destination": ["bob_policy", 0]
     }
+  ]
 }
 ```
 
