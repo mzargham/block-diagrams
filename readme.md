@@ -6,17 +6,44 @@ This repository provides a structured approach to modeling component-based syste
 - A **Component Library** defining reusable "blocks" and "spaces".
 - An **Example Model** demonstrating instantiation and wiring of components.
 
+## Repository Structure
+
+- **models/**
+  - `simple_model.json`: A basic model demonstrating a single processor with a feedback loop.
+  - `control_loop_model.json`: A model illustrating a closed-loop control system with a plant, controller, and sensor.
+  - `game_model.json`: A model representing a two-player game with strategies and payoffs.
+
+- **tools/**
+  - `check_closed_loop.py`: A script to verify if a given block diagram model is fully closed-loop.
+  - `visualize_model.py`: A script to generate visual representations of block diagram models.
+
 ## Table of Contents
 
-1. [Component Library](#component-library)
-2. [Example Model](#example-model)
-3. [JSON Schemas](#json-schemas)
-   - Blocks Schema
-   - Spaces Schema
-   - Processors Schema
-   - Wires Schema
+- [Component-Based System Modeling](#component-based-system-modeling)
+  - [Overview](#overview)
+  - [Repository Structure](#repository-structure)
+  - [Table of Contents](#table-of-contents)
+  - [Conceptual Framework](#conceptual-framework)
+  - [Component Library](#component-library)
+    - [Library JSON Schemas](#library-json-schemas)
+      - [Spaces Schema](#spaces-schema)
+      - [Blocks Schema](#blocks-schema)
+    - [Model JSON Schemas](#model-json-schemas)
+      - [Processors Schema](#processors-schema)
+      - [Wires Schema](#wires-schema)
+  - [Example Records for the Library of Components](#example-records-for-the-library-of-components)
+  - [Example Records for Building Models](#example-records-for-building-models)
+    - [Example Model 1: Simple Dynamical System Plant](#example-model-1-simple-dynamical-system-plant)
+      - [Model Concrete Components](#model-concrete-components)
+      - [**JSON Representation**](#json-representation)
+    - [**Step 2: Define the Concrete Example Model**](#step-2-define-the-concrete-example-model)
+      - [**Example Model (`game_model.json`)**](#example-model-game_modeljson)
+    - [**Explanation**](#explanation)
+
 
 ## Conceptual Framework
+
+The conceptual framework distinguishes abstract patterns that we reuse from concrete components which satisfy those patterns. The abstract patterns tell us how things can be wired together but they cannot themselves be wired, only their concrete counterparts can be wired. By preserving these seperation we can identify and take advantage of stuctural similarities in the systems we're modeling.
 
 The following table categorizes components into **abstract vs. concrete** and **structural vs. behavioral** dimensions:
 
@@ -265,3 +292,131 @@ This system fully closes the control loop by:
     }
   ]
 }
+
+## Building Games
+
+In this section we will create a new Block called "Game" then use the existing components to build a repeated game
+
+---
+
+### **Step 1: Add "Game" Block to the Component Library**
+This is an **abstract block** that goes into **`component_library.json`**.
+
+#### **Library Update (`component_library.json`)**
+```json
+{
+  "ID": "Game",
+  "Name": "Game",
+  "Description": "This is a simple two-player game where each player takes an action in 'U' and receives a payoff in 'Y'.",
+  "Domain": ["U", "U"],
+  "Codomain": ["Y", "Y"]
+}
+```
+
+This defines:
+- **Two input spaces ("U", "U")** for player actions.
+- **Two output spaces ("Y", "Y")** for player payoffs.
+
+---
+
+### **Step 2: Define the Concrete Example Model**
+This **instantiates processors** and **connects them via wires** to form a **game interaction**.
+
+#### **Example Model (`game_model.json`)**
+```json
+{
+  "processors": [
+    {
+      "ID": "game",
+      "Parent": "Game",
+      "Name": "Two-Player Game",
+      "Ports": ["U", "U"],
+      "Terminals": ["Y", "Y"]
+    },
+    {
+      "ID": "alice_policy",
+      "Parent": "G",
+      "Name": "Alice's Strategy",
+      "Ports": ["Y"],
+      "Terminals": ["U"]
+    },
+    {
+      "ID": "bob_policy",
+      "Parent": "G",
+      "Name": "Bob's Strategy",
+      "Ports": ["Y"],
+      "Terminals": ["U"]
+    },
+    {
+      "ID": "alice_payoff",
+      "Parent": "S",
+      "Name": "Alice's Payoff",
+      "Ports": ["X"],
+      "Terminals": ["Y"]
+    },
+    {
+      "ID": "bob_payoff",
+      "Parent": "S",
+      "Name": "Bob's Payoff",
+      "Ports": ["X"],
+      "Terminals": ["Y"]
+    }
+  ],
+  "wires": [
+    {
+      "ID": "w_alice_action",
+      "Parent": "U",
+      "Name": "Alice's Move",
+      "Source": ["alice_policy", 0],
+      "Destination": ["game", 0]
+    },
+    {
+      "ID": "w_bob_action",
+      "Parent": "U",
+      "Name": "Bob's Move",
+      "Source": ["bob_policy", 0],
+      "Destination": ["game", 1]
+    },
+    {
+      "ID": "w_alice_payoff",
+      "Parent": "Y",
+      "Name": "Alice's Reward",
+      "Source": ["game", 0],
+      "Destination": ["alice_payoff", 0]
+    },
+    {
+      "ID": "w_bob_payoff",
+      "Parent": "Y",
+      "Name": "Bob's Reward",
+      "Source": ["game", 1],
+      "Destination": ["bob_payoff", 0]
+    },
+    {
+      "ID": "w_alice_observe",
+      "Parent": "Y",
+      "Name": "Alice Observes Payoff",
+      "Source": ["alice_payoff", 0],
+      "Destination": ["alice_policy", 0]
+    },
+    {
+      "ID": "w_bob_observe",
+      "Parent": "Y",
+      "Name": "Bob Observes Payoff",
+      "Source": ["bob_payoff", 0],
+      "Destination": ["bob_policy", 0]
+    }
+  ]
+}
+```
+
+---
+
+### **Explanation**
+This forms a **closed-loop game** where:
+- **The "Game" processor** takes **two inputs (U, U) → two outputs (Y, Y)**.
+- **Alice and Bob each have**:
+  - **A Strategy ("alice_policy", "bob_policy")**, computing an action (`U`) from the previous payoff (`Y`).
+  - **A Payoff Sensor ("alice_payoff", "bob_payoff")**, measuring the received reward.
+- **The system loops**:
+  - Each player **observes their payoff** and **chooses their next action**.
+  - The **game block updates** the payoffs based on the actions.
