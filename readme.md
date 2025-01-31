@@ -188,9 +188,7 @@ Examples of block records that may be found in a component library:
 
 The first example represents a simple dynamical system:
 
-\[
-x^+ = f(x, u)
-\]
+$$x^+ = f(x, u)$$
 
 #### Model Concrete Components
 
