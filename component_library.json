@@ -1,0 +1,31 @@
+{
+    "spaces": [
+      { "ID": "X", "Name": "state", "Description": "The state space of a dynamical system" },
+      { "ID": "Y", "Name": "output", "Description": "The observable signals for a dynamical system" },
+      { "ID": "U", "Name": "input", "Description": "The controllable signals for a dynamical system" }
+    ],
+    "blocks": [
+      { 
+        "ID": "F", 
+        "Name": "Function", 
+        "Description": "The dynamics of a dynamical system", 
+        "Domain": ["X", "U"], 
+        "Codomain": ["X"] 
+      },
+      { 
+        "ID": "G", 
+        "Name": "Policy", 
+        "Description": "The control policy used to decide what action to take given an observation", 
+        "Domain": ["Y"], 
+        "Codomain": ["U"] 
+      },
+      { 
+        "ID": "S", 
+        "Name": "Sensor", 
+        "Description": "The sensor which emits observable signals based on state", 
+        "Domain": ["X"], 
+        "Codomain": ["Y"] 
+      }
+    ]
+  }
+  

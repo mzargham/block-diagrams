@@ -1,0 +1,49 @@
+{
+    "processors": [
+      {
+        "ID": "f",
+        "Parent": "F",
+        "Name": "Plant",
+        "Ports": ["X", "U"],
+        "Terminals": ["X"]
+      },
+      {
+        "ID": "g",
+        "Parent": "G",
+        "Name": "Controller",
+        "Ports": ["Y"],
+        "Terminals": ["U"]
+      },
+      {
+        "ID": "s",
+        "Parent": "S",
+        "Name": "Sensor",
+        "Ports": ["X"],
+        "Terminals": ["Y"]
+      }
+    ],
+    "wires": [
+      {
+        "ID": "wrefX1",
+        "Parent": "X",
+        "Name": "State Feedback",
+        "Source": ["f", 0],
+        "Destination": ["f", 0]
+      },
+      {
+        "ID": "wrefU1",
+        "Parent": "U",
+        "Name": "Action",
+        "Source": ["g", 0],
+        "Destination": ["f", 1]
+      },
+      {
+        "ID": "wrefY1",
+        "Parent": "Y",
+        "Name": "Observation",
+        "Source": ["s", 0],
+        "Destination": ["g", 0]
+      }
+    ]
+  }
+  
