@@ -427,9 +427,10 @@ Abstractly, this forms a **closed-loop game** where:
 
 Concretely, this example models a **repeated two-player game** where:
 
-- **Alice and Bob** each choose an **action** \( u_A, u_B \) from the action space \( U \).
-- A **game function** \( G(u_A, u_B) \) determines the **payoffs** \( y_A, y_B \) for each player.
-- Each player **observes their own payoff** \( y_A, y_B \) and **updates their strategy** accordingly.
+- **Alice and Bob** each choose an **action** $(u_A, u_B)$ from the action space \( U \).
+- A **game function** $G(u_A, u_B)$ determines the **payoffs** $(y_A, y_B)$ for each player.
+- Each player **observes their own payoff** $y_A$, and $y_B$ respectively
+- The processors for Alice and Bob may be stateful, implying they may **update their strategy**.
 
 #### **Mathematical Representation**
 At each timestep \( t \):
@@ -448,6 +449,7 @@ where $G: U \times U \to Y \times Y$ is the **game function** mapping actions to
 - Each **player observes their own payoff** and **chooses their next action** accordingly.
 - The **game block computes the payoffs** based on the chosen actions.
 - The system forms a **closed-loop interaction** where **strategies evolve dynamically** based on past outcomes.
+- If we want to represent their strategy updates we could "zoom" in and define a more detailed model of how actions are chosen based on past actions and observations, including introducing endogenous state variables which can be thought of as memory, even if they are coded as the parameters of their strategy function.
 
 Further equipping this model with mathematical or computation details would allow for further analysis of the **iterated game dynamics**, including:
 - **Nash equilibrium convergence**
