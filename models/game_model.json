@@ -42,27 +42,13 @@
         "Parent": "Y",
         "Name": "Alice's Reward",
         "Source": ["game", 0],
-        "Destination": ["alice_payoff", 0]
+        "Destination": ["alice_policy", 0]
       },
       {
         "ID": "w_bob_payoff",
         "Parent": "Y",
         "Name": "Bob's Reward",
         "Source": ["game", 1],
-        "Destination": ["bob_payoff", 0]
-      },
-      {
-        "ID": "w_alice_observe",
-        "Parent": "Y",
-        "Name": "Alice Observes Payoff",
-        "Source": ["alice_payoff", 0],
-        "Destination": ["alice_policy", 0]
-      },
-      {
-        "ID": "w_bob_observe",
-        "Parent": "Y",
-        "Name": "Bob Observes Payoff",
-        "Source": ["bob_payoff", 0],
         "Destination": ["bob_policy", 0]
       }
     ]
