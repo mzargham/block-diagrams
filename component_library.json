@@ -2,7 +2,8 @@
     "spaces": [
       { "ID": "X", "Name": "state", "Description": "The state space of a dynamical system" },
       { "ID": "Y", "Name": "output", "Description": "The observable signals for a dynamical system" },
-      { "ID": "U", "Name": "input", "Description": "The controllable signals for a dynamical system" }
+      { "ID": "U", "Name": "input", "Description": "The controllable signals for a dynamical system" },
+      { "ID": "Theta", "Name": "parameters", "Description": "The parameters of a learner" }
     ],
     "blocks": [
       { 
@@ -32,6 +33,20 @@
         "Description": "This is a simple two-player game where each player takes an action in 'U' and receives a payoff in 'Y'.",
         "Domain": ["U", "U"],
         "Codomain": ["Y", "Y"]
+      },
+      { 
+        "ID": "Learner", 
+        "Name": "Learner", 
+        "Description": "A model that learns from past actions and observations",
+        "Domain": ["U", "Y", "Y"], 
+        "Codomain": ["Theta"] 
+      },
+      { 
+        "ID": "Decision", 
+        "Name": "Decision", 
+        "Description": "A decision-making model that generates actions based on learned parameters",
+        "Domain": ["Theta"], 
+        "Codomain": ["U", "Y"] 
       }
     ]
   }

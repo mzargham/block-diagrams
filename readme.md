@@ -48,6 +48,11 @@ This repository provides a structured approach to modeling component-based syste
     - [Explanation](#explanation)
       - [**Mathematical Representation**](#mathematical-representation-1)
     - [**Interpretation**](#interpretation)
+  - [Digging in to make more detailed models](#digging-in-to-make-more-detailed-models)
+    - [Explanation](#explanation-1)
+    - [Mathematical Representation](#mathematical-representation-2)
+    - [How This Model Satisfies the "Policy" Block](#how-this-model-satisfies-the-policy-block)
+    - [**Summary**](#summary)
 
 
 ## Conceptual Framework
@@ -455,3 +460,153 @@ Further equipping this model with mathematical or computation details would allo
 - **Nash equilibrium convergence**
 - **Reinforcement learning simulations**
 - **Strategic decision-making analysis**
+
+## Digging in to make more detailed models
+
+Let's create a concrete model that satisfies the abstract Pattern "Policy". Recall the pattern:
+```json
+{ 
+    "ID": "G", 
+    "Name": "Policy", 
+    "Description": "The control policy used to decide what action to take given an observation", 
+    "Domain": ["Y"], 
+    "Codomain": ["U"] 
+}
+```
+
+We're going to build an "Adaptive Strategy" which has expectations and can adjust based on whether they are met. Here are our new abstract Blocks and spaces
+
+```json
+{
+  "spaces": [
+    { "ID": "Theta", "Name": "parameters", "Description": "The parameters of a learner" }
+  ],
+  "blocks": [
+    { 
+      "ID": "Learner", 
+      "Name": "Learner", 
+      "Description": "A model that learns from past actions and observations",
+      "Domain": ["U", "Y", "Y"], 
+      "Codomain": ["Theta"] 
+    },
+    { 
+      "ID": "Decision", 
+      "Name": "Decision", 
+      "Description": "A decision-making model that generates actions based on learned parameters",
+      "Domain": ["Theta"], 
+      "Codomain": ["U", "Y"] 
+    }
+  ]
+}
+```
+Keep in mind that we still have all of the other abstract components from our library. So we can build the following model
+
+```json
+{
+  "processors": [
+    {
+      "ID": "learner",
+      "Parent": "Learner",
+      "Name": "Adaptive Learner",
+      "Ports": ["U", "Y", "Y"],
+      "Terminals": ["Theta"]
+    },
+    {
+      "ID": "decision",
+      "Parent": "Decision",
+      "Name": "Decision Maker",
+      "Ports": ["Theta"],
+      "Terminals": ["U", "Y"]
+    }
+  ],
+  "wires": [
+    {
+      "ID": "w_theta",
+      "Parent": "Theta",
+      "Name": "Updated Parameters",
+      "Source": ["learner", 0],
+      "Destination": ["decision", 0]
+    },
+    {
+      "ID": "w_action",
+      "Parent": "U",
+      "Name": "Generated Action Feedback",
+      "Source": ["decision", 0],
+      "Destination": ["learner", 0]
+    },
+    {
+      "ID": "w_expected_outcome",
+      "Parent": "Y",
+      "Name": "Expected Outcome Feedback",
+      "Source": ["decision", 1],
+      "Destination": ["learner", 2]
+    }
+  ]
+}
+```
+
+This example extends the **Policy** block concept by incorporating **learning and adaptation**. 
+
+### Explanation
+- A **Policy** block is defined as a function **\( G: Y \to U \)** that maps an observation \( Y \) to an action \( U \).
+- In this model, the **decision-making process** is **adaptive**: it incorporates **learning** from past experiences to refine the policy over time.
+
+This is achieved by introducing two **new components**:
+1. **Learner (`Learner`)**:
+   - Updates parameters \( \theta \) based on past actions, expected outcomes, and realized outcomes.
+2. **Decision Maker (`Decision`)**:
+   - Uses learned parameters \( \theta \) to generate new actions and expected outcomes.
+
+---
+
+### Mathematical Representation
+At each time step \( t \):
+
+1. **The Decision Maker generates an action and an expected outcome**:
+  $$(u^t, \hat{y}^t) = D(\theta^t)$$
+   where:
+   - $\theta^t$ represents the learned parameters at time $t$.
+   - $u^t$ is the **chosen action**.
+   - $\hat{y}^t$ is the **expected outcome**.
+
+2. **The Learner updates its parameters** based on:
+   - The action taken $u^t$.
+   - The realized outcome $y^t$.
+   - The predicted outcome $\hat{y}^t$.
+
+   The learning update rule can be expressed as:
+   $$\theta^{t+1} = L(\theta^t, u^t, \hat{y}^t, y^t)$$
+   where $L$ is the **learning function**.
+
+3. **The parameters are updated and fed back to the Decision Maker**:
+   
+   $$\theta^{t+1} \to D$$
+
+This forms a **closed-loop system** where **observations dynamically shape future actions**.
+
+---
+
+### How This Model Satisfies the "Policy" Block
+The abstract **"Policy" Block (G)** is defined by:
+
+$$G: Y \to U$$
+
+where the function $G$ determines an action $U$ based on an observation $Y$.
+
+The **Adaptive Strategy Model** satisfies this definition because:
+- The **Decision Maker (`Decision`)** computes an **action $U$** based on learned parameters $\theta$.
+- The **Learner (`Learner`)** **adapts** those parameters based on the system's history.
+- The overall system still functions as a **mapping from $Y$ to $U$** but **with an evolving internal state**.
+
+Thus, this model can be seen as an **adaptive extension** of the **Policy Block**, where:
+- The mapping from $Y$ to $U$ is **not static** but **evolves over time**.
+- The system **self-adjusts** using feedback from prior experiences.
+
+---
+
+### **Summary**
+- The **Adaptive Strategy Model** introduces **learning** into decision-making.
+- It extends the **Policy** block by dynamically updating parameters **$ \theta$**.
+- This model is useful for **reinforcement learning**, **adaptive control**, and **strategic decision-making**.
+
+By implementing this structure, we move from a **static policy mapping** to a **self-improving decision process**, making it **suitable for environments with uncertainty and feedback-driven learning**.

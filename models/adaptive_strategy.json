@@ -1,0 +1,41 @@
+{
+    "processors": [
+      {
+        "ID": "learner",
+        "Parent": "Learner",
+        "Name": "Adaptive Learner",
+        "Ports": ["U", "Y", "Y"],
+        "Terminals": ["Theta"]
+      },
+      {
+        "ID": "decision",
+        "Parent": "Decision",
+        "Name": "Decision Maker",
+        "Ports": ["Theta"],
+        "Terminals": ["U", "Y"]
+      }
+    ],
+    "wires": [
+      {
+        "ID": "w_theta",
+        "Parent": "Theta",
+        "Name": "Updated Parameters",
+        "Source": ["learner", 0],
+        "Destination": ["decision", 0]
+      },
+      {
+        "ID": "w_action",
+        "Parent": "U",
+        "Name": "Generated Action Feedback",
+        "Source": ["decision", 0],
+        "Destination": ["learner", 0]
+      },
+      {
+        "ID": "w_expected_outcome",
+        "Parent": "Y",
+        "Name": "Expected Outcome Feedback",
+        "Source": ["decision", 1],
+        "Destination": ["learner", 2]
+      }
+    ]
+  }
