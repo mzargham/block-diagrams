@@ -1,5 +1,8 @@
 #this is totally experimental gpt written code
 
+#we want to write a simpler visualizer program so we can inspect our block diagrams easily
+# we probably don't want to use matplotlib -- we could do some desk reserch to see if there is a better library
+
 def draw_block_diagram_improved():
     """Draws an improved structured block diagram with proper arrow direction and closed-loop indication."""
     fig, ax = plt.subplots(figsize=(6, 4))
