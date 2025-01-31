@@ -396,20 +396,6 @@ This **instantiates processors** and **connects them via wires** to form a **gam
       "Name": "Bob's Strategy",
       "Ports": ["Y"],
       "Terminals": ["U"]
-    },
-    {
-      "ID": "alice_payoff",
-      "Parent": "S",
-      "Name": "Alice's Payoff",
-      "Ports": ["X"],
-      "Terminals": ["Y"]
-    },
-    {
-      "ID": "bob_payoff",
-      "Parent": "S",
-      "Name": "Bob's Payoff",
-      "Ports": ["X"],
-      "Terminals": ["Y"]
     }
   ],
   "wires": [
