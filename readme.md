@@ -53,6 +53,11 @@ This repository provides a structured approach to modeling component-based syste
     - [Mathematical Representation](#mathematical-representation-2)
     - [How This Model Satisfies the "Policy" Block](#how-this-model-satisfies-the-policy-block)
     - [**Summary**](#summary)
+  - [Iterated Game with Learning](#iterated-game-with-learning)
+    - [Overview](#overview-1)
+    - [Mathematical Representation](#mathematical-representation-3)
+    - [Why This Model is Important](#why-this-model-is-important)
+    - [Iterated Game with Learning Model JSON](#iterated-game-with-learning-model-json)
 
 
 ## Conceptual Framework
@@ -610,3 +615,165 @@ Thus, this model can be seen as an **adaptive extension** of the **Policy Block*
 - This model is useful for **reinforcement learning**, **adaptive control**, and **strategic decision-making**.
 
 By implementing this structure, we move from a **static policy mapping** to a **self-improving decision process**, making it **suitable for environments with uncertainty and feedback-driven learning**.
+
+## Iterated Game with Learning
+
+This model extends the **two-player game** by introducing **adaptive learning**, replacing Alice's and Bob's strategies with **self-improving decision processes**.
+
+### Overview
+- Alice and Bob **initially make decisions** based on their current parameters.
+- They **observe their actual payoffs** and **compare them to their expectations**.
+- Their **learners update parameters** to improve future decisions.
+
+This setup simulates **dynamic learning in strategic environments**, such as:
+- **Game Theory**
+- **Multi-Agent Reinforcement Learning**
+- **Economic Decision-Making**
+
+---
+
+### Mathematical Representation
+
+At each time step $t$:
+
+1. **Alice and Bob make decisions** based on their current parameters:
+   $$
+   (u_A^t, \hat{y}_A^t) = D_A(\theta_A^t)
+   $$
+   $$
+   (u_B^t, \hat{y}_B^t) = D_B(\theta_B^t)
+   $$
+   where:
+   - $\theta_A^t, \theta_B^t$ are their current learning parameters.
+   - $u_A^t, u_B^t$ are their chosen actions.
+   - $\hat{y}_A^t, \hat{y}_B^t$ are their **expected payoffs**.
+
+2. **The game computes actual payoffs**:
+   $$
+   (y_A^t, y_B^t) = G(u_A^t, u_B^t)
+   $$
+   where $G: U \times U \to Y \times Y$ is the game function.
+
+3. **Alice and Bob update their learning parameters**:
+   $$
+   \theta_A^{t+1} = L_A(\theta_A^t, u_A^t, \hat{y}_A^t, y_A^t)
+   $$
+   $$
+   \theta_B^{t+1} = L_B(\theta_B^t, u_B^t, \hat{y}_B^t, y_B^t)
+   $$
+   where:
+   - $L_A, L_B$ are their **learning functions**.
+   - They **adjust their parameters** based on:
+     - The action taken $u$.
+     - The expected outcome $\hat{y}$.
+     - The actual payoff $y$.
+
+---
+
+### Why This Model is Important
+- **It generalizes standard game-theoretic models** by incorporating **adaptive learning**.
+- **Players improve over time**, instead of playing a static strategy.
+- It allows us to **study equilibrium learning dynamics** and **strategic adaptation**.
+
+---
+
+### Iterated Game with Learning Model JSON
+```json
+{
+    "processors": [
+      {
+        "ID": "game",
+        "Parent": "Game",
+        "Name": "Two-Player Game",
+        "Ports": ["U", "U"],
+        "Terminals": ["Y", "Y"]
+      },
+      {
+        "ID": "alice_learner",
+        "Parent": "Learner",
+        "Name": "Alice's Learner",
+        "Ports": ["U", "Y", "Y"],
+        "Terminals": ["Theta"]
+      },
+      {
+        "ID": "alice_decision",
+        "Parent": "Decision",
+        "Name": "Alice's Decision",
+        "Ports": ["Theta"],
+        "Terminals": ["U", "Y"]
+      },
+      {
+        "ID": "bob_learner",
+        "Parent": "Learner",
+        "Name": "Bob's Learner",
+        "Ports": ["U", "Y", "Y"],
+        "Terminals": ["Theta"]
+      },
+      {
+        "ID": "bob_decision",
+        "Parent": "Decision",
+        "Name": "Bob's Decision",
+        "Ports": ["Theta"],
+        "Terminals": ["U", "Y"]
+      }
+    ],
+    "wires": [
+      {
+        "ID": "w_alice_theta",
+        "Parent": "Theta",
+        "Name": "Alice's Updated Parameters",
+        "Source": ["alice_learner", 0],
+        "Destination": ["alice_decision", 0]
+      },
+      {
+        "ID": "w_bob_theta",
+        "Parent": "Theta",
+        "Name": "Bob's Updated Parameters",
+        "Source": ["bob_learner", 0],
+        "Destination": ["bob_decision", 0]
+      },
+      {
+        "ID": "w_alice_action",
+        "Parent": "U",
+        "Name": "Alice's Action",
+        "Source": ["alice_decision", 0],
+        "Destination": ["game", 0]
+      },
+      {
+        "ID": "w_bob_action",
+        "Parent": "U",
+        "Name": "Bob's Action",
+        "Source": ["bob_decision", 0],
+        "Destination": ["game", 1]
+      },
+      {
+        "ID": "w_alice_payoff",
+        "Parent": "Y",
+        "Name": "Alice's Realized Payoff",
+        "Source": ["game", 0],
+        "Destination": ["alice_learner", 2]
+      },
+      {
+        "ID": "w_bob_payoff",
+        "Parent": "Y",
+        "Name": "Bob's Realized Payoff",
+        "Source": ["game", 1],
+        "Destination": ["bob_learner", 2]
+      },
+      {
+        "ID": "w_alice_expected_payoff",
+        "Parent": "Y",
+        "Name": "Alice's Expected Payoff",
+        "Source": ["alice_decision", 1],
+        "Destination": ["alice_learner", 1]
+      },
+      {
+        "ID": "w_bob_expected_payoff",
+        "Parent": "Y",
+        "Name": "Bob's Expected Payoff",
+        "Source": ["bob_decision", 1],
+        "Destination": ["bob_learner", 1]
+      }
+    ]
+  }
+```

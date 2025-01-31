@@ -1,0 +1,98 @@
+{
+    "processors": [
+      {
+        "ID": "game",
+        "Parent": "Game",
+        "Name": "Two-Player Game",
+        "Ports": ["U", "U"],
+        "Terminals": ["Y", "Y"]
+      },
+      {
+        "ID": "alice_learner",
+        "Parent": "Learner",
+        "Name": "Alice's Learner",
+        "Ports": ["U", "Y", "Y"],
+        "Terminals": ["Theta"]
+      },
+      {
+        "ID": "alice_decision",
+        "Parent": "Decision",
+        "Name": "Alice's Decision",
+        "Ports": ["Theta"],
+        "Terminals": ["U", "Y"]
+      },
+      {
+        "ID": "bob_learner",
+        "Parent": "Learner",
+        "Name": "Bob's Learner",
+        "Ports": ["U", "Y", "Y"],
+        "Terminals": ["Theta"]
+      },
+      {
+        "ID": "bob_decision",
+        "Parent": "Decision",
+        "Name": "Bob's Decision",
+        "Ports": ["Theta"],
+        "Terminals": ["U", "Y"]
+      }
+    ],
+    "wires": [
+      {
+        "ID": "w_alice_theta",
+        "Parent": "Theta",
+        "Name": "Alice's Updated Parameters",
+        "Source": ["alice_learner", 0],
+        "Destination": ["alice_decision", 0]
+      },
+      {
+        "ID": "w_bob_theta",
+        "Parent": "Theta",
+        "Name": "Bob's Updated Parameters",
+        "Source": ["bob_learner", 0],
+        "Destination": ["bob_decision", 0]
+      },
+      {
+        "ID": "w_alice_action",
+        "Parent": "U",
+        "Name": "Alice's Action",
+        "Source": ["alice_decision", 0],
+        "Destination": ["game", 0]
+      },
+      {
+        "ID": "w_bob_action",
+        "Parent": "U",
+        "Name": "Bob's Action",
+        "Source": ["bob_decision", 0],
+        "Destination": ["game", 1]
+      },
+      {
+        "ID": "w_alice_payoff",
+        "Parent": "Y",
+        "Name": "Alice's Realized Payoff",
+        "Source": ["game", 0],
+        "Destination": ["alice_learner", 2]
+      },
+      {
+        "ID": "w_bob_payoff",
+        "Parent": "Y",
+        "Name": "Bob's Realized Payoff",
+        "Source": ["game", 1],
+        "Destination": ["bob_learner", 2]
+      },
+      {
+        "ID": "w_alice_expected_payoff",
+        "Parent": "Y",
+        "Name": "Alice's Expected Payoff",
+        "Source": ["alice_decision", 1],
+        "Destination": ["alice_learner", 1]
+      },
+      {
+        "ID": "w_bob_expected_payoff",
+        "Parent": "Y",
+        "Name": "Bob's Expected Payoff",
+        "Source": ["bob_decision", 1],
+        "Destination": ["bob_learner", 1]
+      }
+    ]
+  }
+  
