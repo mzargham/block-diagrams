@@ -1,5 +1,7 @@
 # Component-Based System Modeling
 
+This repo demonstrates a technique for encoding Block Diagrams using json.
+
 ## Overview
 
 This repository provides a structured approach to modeling component-based systems. It includes:
@@ -12,18 +14,71 @@ This repository provides a structured approach to modeling component-based syste
   - [x] `simple_model.json`: A basic model demonstrating a single processor with a feedback loop.
   - [x] `control_loop_model.json`: A model illustrating a closed-loop control system with a plant, controller, and sensor.
   - [x] `game_model.json`: A model representing a two-player game with strategies and payoffs.
+  - [x] `adaptive_strategy.json`: A model representing a learning agent's decision process.
+  - [x] `iterated_game_with_learning.json`: A model integrating learning agents into the two-payer game.
 
 - **tools/**
   - [ ] `check_closed_loop.py`: A script to verify if a given block diagram model is fully closed-loop.
   - [ ] `visualize_model.py`: A script to generate visual representations of block diagram models.
+
+## Quickstart
+### Conceptual Framework
+
+The conceptual framework distinguishes abstract patterns that we reuse from concrete components which satisfy those patterns. The abstract patterns tell us how things can be wired together but they cannot themselves be wired, only their concrete counterparts can be wired. By preserving these seperation we can identify and take advantage of stuctural similarities in the systems we're modeling.
+
+The following table categorizes components into **abstract vs. concrete** and **structural vs. behavioral** dimensions:
+
+|               | Abstract  | Concrete  |
+|--------------|-----------|-----------|
+| **Structure** | Space     | Wire      |
+| **Behavior**  | Block     | Processor |
+
+This classification provides a clear distinction between the elements of the system:
+
+- **Abstract Structure (Space)**: Represents the conceptual spaces through which data, signals, or states flow.
+- **Abstract Behavior (Block)**: Defines reusable templates describing how components behave in a system.
+- **Concrete Structure (Wire)**: Connects instantiated components (processors) according to defined spaces.
+- **Concrete Behavior (Processor)**: An instance of a block that interacts within the system based on its structure.
+
+In summary, **spaces and blocks define the abstract model**, while **wires and processors bring it into concrete implementation** through instantiation and connectivity.
+
+
+### Example Models
+
+#### 1. Simple Dynamical System Plant
+- **Description**: A basic model demonstrating a single processor with a feedback loop.
+- **Model JSON**: [simple_model.json](models/simple_model.json)
+
+#### 2. Closed-Loop Control System
+- **Description**: A model illustrating a closed-loop control system with a plant, controller, and sensor.
+- **Model JSON**: [control_loop_model.json](models/control_loop_model.json)
+
+#### 3. Two-Player Game Model
+- **Description**: A model representing a two-player game with strategies and payoffs.
+- **Model JSON**: [game_model.json](models/game_model.json)
+
+#### 4. Adaptive Strategy Model
+- **Description**: This model introduces an adaptive strategy where the decision-making process incorporates learning from past experiences to refine the policy over time.
+- **Model JSON**: [adaptive_strategy.json](models/adaptive_strategy.json)
+
+#### 5. Iterated Game with Learning
+- **Description**: An extension of the two-player game model where both players employ adaptive strategies, allowing them to learn and evolve their strategies over multiple iterations.
+- **Model JSON**: [iterated_game_with_learning.json](models/iterated_game_with_learning.json)
 
 ## Table of Contents
 
 - [Component-Based System Modeling](#component-based-system-modeling)
   - [Overview](#overview)
   - [Repository Structure](#repository-structure)
+  - [Quickstart](#quickstart)
+    - [Conceptual Framework](#conceptual-framework)
+    - [Example Models](#example-models)
+      - [1. Simple Dynamical System Plant](#1-simple-dynamical-system-plant)
+      - [2. Closed-Loop Control System](#2-closed-loop-control-system)
+      - [3. Two-Player Game Model](#3-two-player-game-model)
+      - [4. Adaptive Strategy Model](#4-adaptive-strategy-model)
+      - [5. Iterated Game with Learning](#5-iterated-game-with-learning)
   - [Table of Contents](#table-of-contents)
-  - [Conceptual Framework](#conceptual-framework)
   - [Component Library](#component-library)
     - [Library JSON Schemas](#library-json-schemas)
       - [Spaces Schema](#spaces-schema)
@@ -46,13 +101,13 @@ This repository provides a structured approach to modeling component-based syste
     - [Step 2: Define the Concrete Example Model](#step-2-define-the-concrete-example-model)
       - [Example Model (`game_model.json`)](#example-model-game_modeljson)
     - [Explanation](#explanation)
-      - [**Mathematical Representation**](#mathematical-representation-1)
-    - [**Interpretation**](#interpretation)
+      - [Mathematical Representation](#mathematical-representation-1)
+    - [Interpretation](#interpretation)
   - [Digging in to make more detailed models](#digging-in-to-make-more-detailed-models)
     - [Explanation](#explanation-1)
     - [Mathematical Representation](#mathematical-representation-2)
     - [How This Model Satisfies the "Policy" Block](#how-this-model-satisfies-the-policy-block)
-    - [**Summary**](#summary)
+    - [Summary](#summary)
   - [Iterated Game with Learning](#iterated-game-with-learning)
     - [Overview](#overview-1)
     - [Mathematical Representation](#mathematical-representation-3)
@@ -60,25 +115,6 @@ This repository provides a structured approach to modeling component-based syste
     - [Iterated Game with Learning Model JSON](#iterated-game-with-learning-model-json)
 
 
-## Conceptual Framework
-
-The conceptual framework distinguishes abstract patterns that we reuse from concrete components which satisfy those patterns. The abstract patterns tell us how things can be wired together but they cannot themselves be wired, only their concrete counterparts can be wired. By preserving these seperation we can identify and take advantage of stuctural similarities in the systems we're modeling.
-
-The following table categorizes components into **abstract vs. concrete** and **structural vs. behavioral** dimensions:
-
-|               | Abstract  | Concrete  |
-|--------------|-----------|-----------|
-| **Structure** | Space     | Wire      |
-| **Behavior**  | Block     | Processor |
-
-This classification provides a clear distinction between the elements of the system:
-
-- **Abstract Structure (Space)**: Represents the conceptual spaces through which data, signals, or states flow.
-- **Abstract Behavior (Block)**: Defines reusable templates describing how components behave in a system.
-- **Concrete Structure (Wire)**: Connects instantiated components (processors) according to defined spaces.
-- **Concrete Behavior (Processor)**: An instance of a block that interacts within the system based on its structure.
-
-In summary, **spaces and blocks define the abstract model**, while **wires and processors bring it into concrete implementation** through instantiation and connectivity.
 
 ---
 
@@ -442,7 +478,7 @@ Concretely, this example models a **repeated two-player game** where:
 - Each player **observes their own payoff** $y_A$, and $y_B$ respectively
 - The processors for Alice and Bob may be stateful, implying they may **update their strategy**.
 
-#### **Mathematical Representation**
+#### Mathematical Representation
 At each timestep \( t \):
 
 1. **Players Choose Actions:**
@@ -455,7 +491,7 @@ $$(y_A^t, y_B^t) = G(u_A^t, u_B^t)$$
 where $G: U \times U \to Y \times Y$ is the **game function** mapping actions to payoffs.
 
 
-### **Interpretation**
+### Interpretation
 - Each **player observes their own payoff** and **chooses their next action** accordingly.
 - The **game block computes the payoffs** based on the chosen actions.
 - The system forms a **closed-loop interaction** where **strategies evolve dynamically** based on past outcomes.
@@ -609,7 +645,7 @@ Thus, this model can be seen as an **adaptive extension** of the **Policy Block*
 
 ---
 
-### **Summary**
+### Summary
 - The **Adaptive Strategy Model** introduces **learning** into decision-making.
 - It extends the **Policy** block by dynamically updating parameters **$ \theta$**.
 - This model is useful for **reinforcement learning**, **adaptive control**, and **strategic decision-making**.
