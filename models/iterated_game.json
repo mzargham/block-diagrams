@@ -1,0 +1,83 @@
+{
+    "processors": [
+      {
+        "ID": "game",
+        "Parent": "Game",
+        "Name": "Two-Player Game",
+        "Ports": ["U", "U"],
+        "Terminals": ["Y", "Y"]
+      },
+      {
+        "ID": "alice_policy",
+        "Parent": "G",
+        "Name": "Alice's Strategy",
+        "Ports": ["Y"],
+        "Terminals": ["U"]
+      },
+      {
+        "ID": "bob_policy",
+        "Parent": "G",
+        "Name": "Bob's Strategy",
+        "Ports": ["Y"],
+        "Terminals": ["U"]
+      },
+      {
+        "ID": "alice_payoff",
+        "Parent": "S",
+        "Name": "Alice's Payoff",
+        "Ports": ["X"],
+        "Terminals": ["Y"]
+      },
+      {
+        "ID": "bob_payoff",
+        "Parent": "S",
+        "Name": "Bob's Payoff",
+        "Ports": ["X"],
+        "Terminals": ["Y"]
+      }
+    ],
+    "wires": [
+      {
+        "ID": "w_alice_action",
+        "Parent": "U",
+        "Name": "Alice's Move",
+        "Source": ["alice_policy", 0],
+        "Destination": ["game", 0]
+      },
+      {
+        "ID": "w_bob_action",
+        "Parent": "U",
+        "Name": "Bob's Move",
+        "Source": ["bob_policy", 0],
+        "Destination": ["game", 1]
+      },
+      {
+        "ID": "w_alice_payoff",
+        "Parent": "Y",
+        "Name": "Alice's Reward",
+        "Source": ["game", 0],
+        "Destination": ["alice_payoff", 0]
+      },
+      {
+        "ID": "w_bob_payoff",
+        "Parent": "Y",
+        "Name": "Bob's Reward",
+        "Source": ["game", 1],
+        "Destination": ["bob_payoff", 0]
+      },
+      {
+        "ID": "w_alice_observe",
+        "Parent": "Y",
+        "Name": "Alice Observes Payoff",
+        "Source": ["alice_payoff", 0],
+        "Destination": ["alice_policy", 0]
+      },
+      {
+        "ID": "w_bob_observe",
+        "Parent": "Y",
+        "Name": "Bob Observes Payoff",
+        "Source": ["bob_payoff", 0],
+        "Destination": ["bob_policy", 0]
+      }
+    ]
+  }

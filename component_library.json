@@ -25,6 +25,13 @@
         "Description": "The sensor which emits observable signals based on state", 
         "Domain": ["X"], 
         "Codomain": ["Y"] 
+      },
+      {
+        "ID": "Game",
+        "Name": "Game",
+        "Description": "This is a simple two-player game where each player takes an action in 'U' and receives a payoff in 'Y'.",
+        "Domain": ["U", "U"],
+        "Codomain": ["Y", "Y"]
       }
     ]
   }
