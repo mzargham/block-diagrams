@@ -34,14 +34,12 @@ This repository provides a structured approach to modeling component-based syste
   - [Example Records for the Library of Components](#example-records-for-the-library-of-components)
   - [Example Records for Building Models](#example-records-for-building-models)
     - [Example Model 1: Simple Dynamical System Plant](#example-model-1-simple-dynamical-system-plant)
-      - [Model Concrete Components](#model-concrete-components)
-      - [**JSON Representation**](#json-representation)
-    - [Example Model 2: Closing the Control Loop](#example-model-2-closing-the-control-loop)
-  - [Example 2: Closing the Control Loop](#example-2-closing-the-control-loop)
-    - [**Mathematical Representation**](#mathematical-representation)
-    - [**Conceptual Diagram**](#conceptual-diagram)
       - [Concrete Components](#concrete-components)
-      - [**JSON Representation**](#json-representation-1)
+      - [JSON Representation](#json-representation)
+    - [Example 2: Closing the Control Loop](#example-2-closing-the-control-loop)
+      - [Mathematical Representation](#mathematical-representation)
+      - [Concrete Components](#concrete-components-1)
+      - [JSON Representation](#json-representation-1)
   - [Building Games](#building-games)
     - [Step 1: Add "Game" Block to the Component Library](#step-1-add-game-block-to-the-component-library)
       - [Library Update (`component_library.json`)](#library-update-component_libraryjson)
@@ -190,14 +188,14 @@ The first example represents a simple dynamical system:
 
 $$x^+ = f(x, u)$$
 
-#### Model Concrete Components
+#### Concrete Components
 
 This system consists of:
 - **One Processor ("f")**: Instantiated from the **Function Block ("F")**, representing the system dynamics.
 - **One Wire ("wrefX")**: Connects the **state output (X) back to the state input (X)**, creating a feedback loop.
 - **One Open Port ("U")**: The system has an **unconnected input port** of type `"U"`, meaning an external controller or policy could later provide an input signal.
 
-#### **JSON Representation**
+#### JSON Representation
 
 ```json
 {
@@ -221,14 +219,11 @@ This system consists of:
   ]
 }
 ```
-
-### Example Model 2: Closing the Control Loop
-
-## Example 2: Closing the Control Loop
+### Example 2: Closing the Control Loop
 
 The second example extends the first by introducing a **Controller ("g")** and a **Sensor ("s")**, forming a closed-loop system.
 
-### **Mathematical Representation**
+#### Mathematical Representation
 
 $$x^+ = f(x, u)$$
 $$y = s(x)$$
@@ -239,8 +234,6 @@ This system fully closes the control loop by:
 2. **Computing a control action (\( g \to f \))**.
 3. **Executing system dynamics (\( f \to s \))**.
 
-### **Conceptual Diagram**
-
 #### Concrete Components
 - **Processor "f" (Plant)**: Represents the system dynamics.
 - **Processor "g" (Controller)**: Computes control input based on observed output.
@@ -250,7 +243,7 @@ This system fully closes the control loop by:
   - `"wrefU1"`: Connects **Controller (g) output (U) to Plant (f) input (U)**.
   - `"wrefY1"`: Connects **Sensor (s) output (Y) to Controller (g) input (Y)**.
 
-#### **JSON Representation**
+#### JSON Representation
 ```json
 {
   "processors": [
@@ -304,7 +297,7 @@ This system fully closes the control loop by:
 
 ## Building Games
 
-In this section we will create a new Block called "Game" then use the existing components to build a repeated game
+In this section we will create a new Block called "Game" then use the existing components to build a repeated game. In addition to building the concrete model of the game, we will commit a new abstract component to the library, then use it along with previously defined abstract blocks and spaces.
 
 ---
 
