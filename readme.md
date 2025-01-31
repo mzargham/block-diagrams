@@ -46,6 +46,8 @@ This repository provides a structured approach to modeling component-based syste
     - [Step 2: Define the Concrete Example Model](#step-2-define-the-concrete-example-model)
       - [Example Model (`game_model.json`)](#example-model-game_modeljson)
     - [Explanation](#explanation)
+      - [**Mathematical Representation**](#mathematical-representation-1)
+    - [**Interpretation**](#interpretation)
 
 
 ## Conceptual Framework
@@ -414,11 +416,40 @@ This **instantiates processors** and **connects them via wires** to form a **gam
 ---
 
 ### Explanation
-This forms a **closed-loop game** where:
+Abstractly, this forms a **closed-loop game** where:
 - **The "Game" processor** takes **two inputs (U, U) → two outputs (Y, Y)**.
 - **Alice and Bob each have**:
   - **A Strategy ("alice_policy", "bob_policy")**, computing an action (`U`) from the previous payoff (`Y`).
-  - **A Payoff Sensor ("alice_payoff", "bob_payoff")**, measuring the received reward.
+  - Since we have not specified their details, we have not precluded strategies involving memory of past actions and payoffs.
 - **The system loops**:
   - Each player **observes their payoff** and **chooses their next action**.
   - The **game block updates** the payoffs based on the actions.
+
+Concretely, this example models a **repeated two-player game** where:
+
+- **Alice and Bob** each choose an **action** \( u_A, u_B \) from the action space \( U \).
+- A **game function** \( G(u_A, u_B) \) determines the **payoffs** \( y_A, y_B \) for each player.
+- Each player **observes their own payoff** \( y_A, y_B \) and **updates their strategy** accordingly.
+
+#### **Mathematical Representation**
+At each timestep \( t \):
+
+1. **Players Choose Actions:**
+$$u_A^t = g_A(y_A^{t-1})$$
+$$u_B^t = g_B(y_B^{t-1})$$
+where $g_A$ and $g_B$ are the **strategy functions** (policies) of Alice and Bob, respectively.
+
+2. **Game Determines Payoffs:**
+$$(y_A^t, y_B^t) = G(u_A^t, u_B^t)$$
+where $G: U \times U \to Y \times Y$ is the **game function** mapping actions to payoffs.
+
+
+### **Interpretation**
+- Each **player observes their own payoff** and **chooses their next action** accordingly.
+- The **game block computes the payoffs** based on the chosen actions.
+- The system forms a **closed-loop interaction** where **strategies evolve dynamically** based on past outcomes.
+
+Further equipping this model with mathematical or computation details would allow for further analysis of the **iterated game dynamics**, including:
+- **Nash equilibrium convergence**
+- **Reinforcement learning simulations**
+- **Strategic decision-making analysis**
