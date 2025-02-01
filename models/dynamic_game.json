@@ -1,0 +1,83 @@
+{
+    "processors": [
+        {
+            "ID": "alice_dynamics",
+            "Parent": "F",
+            "Name": "Alice's Dynamics",
+            "Ports": ["X", "U"],
+            "Terminals": ["X"]
+        },
+        {
+            "ID": "bob_dynamics",
+            "Parent": "F",
+            "Name": "Bob's Dynamics",
+            "Ports": ["X", "U"],
+            "Terminals": ["X"]
+        },
+        {
+            "ID": "state_aggregator",
+            "Parent": "A",
+            "Name": "State Aggegrator",
+            "Ports": ["X", "X"],
+            "Terminals": ["X"]
+        },
+        {
+            "ID": "alice_sensor",
+            "Parent": "S",
+            "Name": "Alice's Sensor",
+            "Ports": ["X"],
+            "Terminals": ["Y"]
+        },
+        {
+            "ID": "bob_sensor",
+            "Parent": "S",
+            "Name": "Bob's Sensor",
+            "Ports": ["X"],
+            "Terminals": ["Y"]
+        }
+    ],
+    "wires": [
+        {
+            "ID": "alice_feedback_wire",
+            "Parent": "X",
+            "Name": "Alice State Feedback",
+            "Source": ["alice_dynamics", 0],
+            "Destination": ["alice_dynamics", 0]
+        },
+        {
+            "ID": "bob_feedback_wire",
+            "Parent": "X",
+            "Name": "Bob State Feedback",
+            "Source": ["bob_dynamics", 0],
+            "Destination": ["bob_dynamics", 0]
+        },
+        {
+            "ID": "alice_feedforward_wire",
+            "Parent": "X",
+            "Name": "Alice State ",
+            "Source": ["alice_dynamics", 0],
+            "Destination": ["state_aggegator", 0]
+        },
+        {
+            "ID": "bob_feedforward_wire",
+            "Parent": "X",
+            "Name": "Bob State",
+            "Source": ["bob_dynamics", 0],
+            "Destination": ["state_aggegator", 1]
+        },
+        {
+            "ID": "aggregated_state_to_alice",
+            "Parent": "X",
+            "Name": "Aggregated State to Alice",
+            "Source": ["state_aggregator", 0],
+            "Destination": ["alice_sensor", 0]
+        },
+        {
+            "ID": "aggregated_state_to_bob",
+            "Parent": "X",
+            "Name": "Aggregated State to Bob",
+            "Source": ["state_aggregator", 0],
+            "Destination": ["bob_sensor", 0]
+        }
+    ]
+  }
