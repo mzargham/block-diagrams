@@ -1,47 +1,97 @@
-#this is totally experimental gpt written code
+import json
+import graphviz
 
-#we want to write a simpler visualizer program so we can inspect our block diagrams easily
-# we probably don't want to use matplotlib -- we could do some desk reserch to see if there is a better library
+# Example block diagram JSON
+block_diagram = {
+    "processors": [
+        {
+            "ID": "f",
+            "Parent": "F",
+            "Name": "Plant",
+            "Ports": ["X", "U"],
+            "Terminals": ["X"]
+        },
+        {
+            "ID": "g",
+            "Parent": "G",
+            "Name": "Controller",
+            "Ports": ["Y"],
+            "Terminals": ["U"]
+        },
+        {
+            "ID": "s",
+            "Parent": "S",
+            "Name": "Sensor",
+            "Ports": ["X"],
+            "Terminals": ["Y"]
+        }
+    ],
+    "wires": [
+        {
+            "ID": "wrefX1",
+            "Parent": "X",
+            "Name": "State Feedback",
+            "Source": ["f", 0],
+            "Destination": ["f", 0]
+        },
+        {
+            "ID": "wrefU1",
+            "Parent": "U",
+            "Name": "Action",
+            "Source": ["g", 0],
+            "Destination": ["f", 1]
+        },
+        {
+            "ID": "wrefY1",
+            "Parent": "Y",
+            "Name": "Observation",
+            "Source": ["s", 0],
+            "Destination": ["g", 0]
+        }
+    ]
+}
 
-def draw_block_diagram_improved():
-    """Draws an improved structured block diagram with proper arrow direction and closed-loop indication."""
-    fig, ax = plt.subplots(figsize=(6, 4))
-    ax.set_xlim(-1, 5)
-    ax.set_ylim(-1, 3)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.axis("off")
+def generate_block_diagram(block_diagram, output_filename="block_diagram"):
+    """Generates a Graphviz block diagram from a JSON block diagram model."""
+    
+    # Create Graphviz Digraph
+    dot = graphviz.Digraph(format="png")
+    dot.attr(rankdir="LR")  # Left to Right Layout
 
-    # Draw block (Processor "f")
-    block = patches.Rectangle((2, 1), 2, 1, edgecolor="black", facecolor="lightblue", lw=2)
-    ax.add_patch(block)
-    ax.text(3, 1.5, "Dynamics (f)", ha="center", va="center", fontsize=12, fontweight="bold")
+    # Define colors for different spaces (optional for clarity)
+    space_colors = {
+        "F": "lightblue",  # Plant
+        "G": "lightcoral",  # Controller
+        "S": "yellow",  # Sensor
+    }
 
-    # Draw ports and terminals
-    # Ports (Inputs on left)
-    ax.plot(1.8, 1.7, "ko", markersize=6)  # Input Port "U"
-    ax.text(1.5, 1.7, "U", ha="right", va="center", fontsize=12)
+    # Add processors (blocks) with improved layout
+    for processor in block_diagram["processors"]:
+        block_id = processor["ID"]
+        name = processor["Name"]
+        ports = " | ".join(processor["Ports"]) if processor["Ports"] else "No Ports"
+        terminals = " | ".join(processor["Terminals"]) if processor["Terminals"] else "No Terminals"
 
-    ax.plot(1.8, 1.3, "ko", markersize=6)  # Input Port "X"
-    ax.text(1.5, 1.3, "X", ha="right", va="center", fontsize=12)
+        # Define block label with ports at the top, name in the middle, and terminals at the bottom
+        label = f"{{ {{ {ports} }} | {name} | {{ {terminals} }} }}"
+        fillcolor = space_colors.get(processor["Parent"], "lightgray")  # Default color
 
-    # Terminals (Outputs on right)
-    ax.plot(4.2, 1.5, "ro", markersize=6)  # Terminal "X"
-    ax.text(4.4, 1.5, "X", ha="left", va="center", fontsize=12)
+        # Add processor node
+        dot.node(block_id, label=label, shape="Mrecord", style="filled", fillcolor=fillcolor)
 
-    # Draw wires with correct direction (Terminal → Port)
-    ax.arrow(4.2, 1.5, 0.8, 0, head_width=0.1, head_length=0.2, fc="black", ec="black")  # Output X to feedback loop
+    # Add wires (connections)
+    for wire in block_diagram["wires"]:
+        src_block, _ = wire["Source"]
+        dst_block, _ = wire["Destination"]
+        label = wire["Name"]
+        style = "dashed" if "Feedback" in label else "solid"  # Dashed lines for feedback
 
-    # Looping back the feedback wire with a curve to visually indicate a loop
-    loop_x = [5.0, 5.2, 4.0, 1.0, 1.0, 1.8]
-    loop_y = [1.5, 2.0, 2.5, 2.5, 1.3, 1.3]
-    ax.plot(loop_x, loop_y, "k-", lw=1.5)  # Curved feedback wire
+        # Draw the connection
+        dot.edge(src_block, dst_block, label=label, style=style)
 
-    # Indicate the open port (U)
-    ax.text(1.5, 2.2, "Open Port (U)", ha="right", va="center", fontsize=10, color="red")
+    # Render and save the diagram
+    dot.render(output_filename)
+    print(f"Block diagram saved as {output_filename}.png")
 
-    plt.title("Block Diagram: Simple System (Closed-Loop Ready)", fontsize=14, fontweight="bold")
-    plt.show()
-
-# Draw the improved block diagram with clear closed-loop indication
-draw_block_diagram_improved()
+# Generate the block diagram
+generate_block_diagram(block_diagram, "block_diagram_improved")
