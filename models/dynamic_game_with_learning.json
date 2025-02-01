@@ -1,0 +1,167 @@
+{
+    "processors": [
+        {
+            "ID": "alice_dynamics",
+            "Parent": "F",
+            "Name": "Alice's Dynamics",
+            "Ports": ["X", "U"],
+            "Terminals": ["X"]
+        },
+        {
+            "ID": "bob_dynamics",
+            "Parent": "F",
+            "Name": "Bob's Dynamics",
+            "Ports": ["X", "U"],
+            "Terminals": ["X"]
+        },
+        {
+            "ID": "state_aggregator",
+            "Parent": "A",
+            "Name": "State Aggregator",
+            "Ports": ["X", "X"],
+            "Terminals": ["X"]
+        },
+        {
+            "ID": "alice_sensor",
+            "Parent": "S",
+            "Name": "Alice's Sensor",
+            "Ports": ["X"],
+            "Terminals": ["Y"]
+        },
+        {
+            "ID": "bob_sensor",
+            "Parent": "S",
+            "Name": "Bob's Sensor",
+            "Ports": ["X"],
+            "Terminals": ["Y"]
+        },
+        {
+            "ID": "alice_learner",
+            "Parent": "Learner",
+            "Name": "Alice's Learner",
+            "Ports": ["U", "Y", "Y"],
+            "Terminals": ["Theta"]
+        },
+        {
+            "ID": "alice_decision",
+            "Parent": "Decision",
+            "Name": "Alice's Decision",
+            "Ports": ["Theta"],
+            "Terminals": ["U", "Y"]
+        },
+        {
+            "ID": "bob_learner",
+            "Parent": "Learner",
+            "Name": "Bob's Learner",
+            "Ports": ["U", "Y", "Y"],
+            "Terminals": ["Theta"]
+        },
+        {
+            "ID": "bob_decision",
+            "Parent": "Decision",
+            "Name": "Bob's Decision",
+            "Ports": ["Theta"],
+            "Terminals": ["U", "Y"]
+        }
+    ],
+    "wires": [
+        {
+            "ID": "w_alice_theta",
+            "Parent": "Theta",
+            "Name": "Alice's Updated Parameters",
+            "Source": ["alice_learner", 0],
+            "Destination": ["alice_decision", 0]
+        },
+        {
+            "ID": "w_bob_theta",
+            "Parent": "Theta",
+            "Name": "Bob's Updated Parameters",
+            "Source": ["bob_learner", 0],
+            "Destination": ["bob_decision", 0]
+        },
+        {
+            "ID": "w_alice_action",
+            "Parent": "U",
+            "Name": "Alice's Action",
+            "Source": ["alice_decision", 0],
+            "Destination": ["alice_dynamics", 1]
+        },
+        {
+            "ID": "w_bob_action",
+            "Parent": "U",
+            "Name": "Bob's Action",
+            "Source": ["bob_decision", 0],
+            "Destination": ["bob_dynamics", 1]
+        },
+        {
+            "ID": "alice_feedback_wire",
+            "Parent": "X",
+            "Name": "Alice State Feedback",
+            "Source": ["alice_dynamics", 0],
+            "Destination": ["alice_dynamics", 0]
+        },
+        {
+            "ID": "bob_feedback_wire",
+            "Parent": "X",
+            "Name": "Bob State Feedback",
+            "Source": ["bob_dynamics", 0],
+            "Destination": ["bob_dynamics", 0]
+        },
+        {
+            "ID": "alice_feedforward_wire",
+            "Parent": "X",
+            "Name": "Alice State",
+            "Source": ["alice_dynamics", 0],
+            "Destination": ["state_aggregator", 0]
+        },
+        {
+            "ID": "bob_feedforward_wire",
+            "Parent": "X",
+            "Name": "Bob State",
+            "Source": ["bob_dynamics", 0],
+            "Destination": ["state_aggregator", 1]
+        },
+        {
+            "ID": "aggregated_state_to_alice",
+            "Parent": "X",
+            "Name": "Aggregated State to Alice",
+            "Source": ["state_aggregator", 0],
+            "Destination": ["alice_sensor", 0]
+        },
+        {
+            "ID": "aggregated_state_to_bob",
+            "Parent": "X",
+            "Name": "Aggregated State to Bob",
+            "Source": ["state_aggregator", 0],
+            "Destination": ["bob_sensor", 0]
+        },
+        {
+            "ID": "w_alice_payoff",
+            "Parent": "Y",
+            "Name": "Alice's Realized Payoff",
+            "Source": ["alice_sensor", 0],
+            "Destination": ["alice_learner", 2]
+        },
+        {
+            "ID": "w_bob_payoff",
+            "Parent": "Y",
+            "Name": "Bob's Realized Payoff",
+            "Source": ["bob_sensor", 0],
+            "Destination": ["bob_learner", 2]
+        },
+        {
+            "ID": "w_alice_expected_payoff",
+            "Parent": "Y",
+            "Name": "Alice's Expected Payoff",
+            "Source": ["alice_decision", 1],
+            "Destination": ["alice_learner", 1]
+        },
+        {
+            "ID": "w_bob_expected_payoff",
+            "Parent": "Y",
+            "Name": "Bob's Expected Payoff",
+            "Source": ["bob_decision", 1],
+            "Destination": ["bob_learner", 1]
+        }
+    ]
+}
