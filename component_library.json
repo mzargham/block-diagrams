@@ -47,6 +47,13 @@
         "Description": "A decision-making model that generates actions based on learned parameters",
         "Domain": ["Theta"], 
         "Codomain": ["U", "Y"] 
+      },
+      { 
+        "ID": "A", 
+        "Name": "Aggregator", 
+        "Description": "A simple process that accepts to values of state and returnd one value",
+        "Domain": ["X", "X"], 
+        "Codomain": ["X"] 
       }
     ]
   }
