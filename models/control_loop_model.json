@@ -43,6 +43,13 @@
         "Name": "Observation",
         "Source": ["s", 0],
         "Destination": ["g", 0]
+      },
+      {
+        "ID": "wrefXSense",
+        "Parent": "X",
+        "Name": "State Measurement",
+        "Source": ["f", 0],
+        "Destination": ["s", 0]
       }
     ]
   }
