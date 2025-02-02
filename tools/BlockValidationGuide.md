@@ -20,7 +20,7 @@ A **Processor** is a **specific implementation** of a block, but **a subsystem c
 | **Block Name**   | **Inputs (Domain)** | **Outputs (Codomain)** |
 |----------------|----------------|-----------------|
 | **`open_game`** | `["U", "U"]`  | `["Y", "Y"]` |
-| **`closed_game`** | `[]`  | `["Y", "Y"]` |
+| **`closed_game`** | `[]`  | `["U", "U", "Y", "Y"]` |
 
 ### **Block Definitions**
 #### **📝 `open_game.json`**
@@ -38,9 +38,9 @@ A **Processor** is a **specific implementation** of a block, but **a subsystem c
 {
   "ID": "closed_game",
   "Name": "Closed Game",
-  "Description": "A game where players' policies are included, requiring no external inputs.",
+  "Description": "A game where players' policies are included, requiring no external inputs, but tracking both actions and payoffs.",
   "Domain": [],
-  "Codomain": ["Y", "Y"]
+  "Codomain": ["U", "U", "Y", "Y"]
 }
 ```
 
@@ -126,8 +126,8 @@ A **single `Game` processor**, but **with policies included**.
       "ID": "game_instance",
       "Parent": "Game",
       "Name": "Simple Game",
-      "Ports": ["U", "U"],
-      "Terminals": ["Y", "Y"]
+      "Ports": [],
+      "Terminals": ["U", "U", "Y", "Y"]
     },
     {
       "ID": "policy_1",
@@ -162,6 +162,7 @@ A **single `Game` processor**, but **with policies included**.
 ```
 ✅ **Matches `closed_game`** because:
 - The policies **remove external inputs (`U`)**, making it self-contained.
+- It **explicitly outputs both `U` (actions taken) and `Y` (payoffs).**
 
 ---
 
@@ -230,10 +231,11 @@ The **dynamic game, but with policies included**, making it self-contained.
 ```
 ✅ **Matches `closed_game`** because:
 - The policies **remove external inputs (`U`)**, making it self-contained.
+- The game **explicitly outputs `U` (actions taken) and `Y` (payoffs).**
 
 ---
 
 ### **5. Summary**
 ✅ **A model satisfies a block if:**
 - It **accepts the required inputs** (or none, for `closed_game`).
-- It **produces the required outputs**.
+- It **produces the required outputs** (`Y` and, for `closed_game`, `U` as well).
