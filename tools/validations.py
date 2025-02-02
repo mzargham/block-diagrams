@@ -3,7 +3,7 @@
 # does a model satisfy the requirements of block?
 # what are their open ports? 
 # are the wires typed correctly? Done
-# do we have duplicate wires into the same port? 
+# do we have duplicate wires into the same port? Done
 
 import json
 
@@ -252,3 +252,65 @@ def test_are_wires_typed_correctly():
 
 if __name__ == "__main__":
     test_are_wires_typed_correctly()
+
+def no_duplicate_wires_into_ports(model):
+    """
+    Checks if any two wires are plugged into the same destination port.
+    It's valid for multiple wires to come from the same terminal,
+    but each port should have at most one incoming wire.
+    """
+    occupied_ports = {}  # Tracks wires going into each port
+
+    for wire in model["wires"]:
+        dest_proc, dest_idx = wire["Destination"]
+        port_key = (dest_proc, dest_idx)  # Unique identifier for a destination port
+
+        if port_key in occupied_ports:
+            print(f"Error: Multiple wires are connected to the same port {dest_idx} on processor '{dest_proc}'. "
+                  f"Conflicting Wires: {occupied_ports[port_key]} and {wire['ID']}")
+            return False  # Found a duplicate connection
+        
+        occupied_ports[port_key] = wire["ID"]  # Register this port as occupied
+
+    return True  # No duplicate ports found
+
+
+def test_no_duplicate_wires_into_ports():
+    """
+    Tests the no_duplicate_wires_into_ports function.
+    """
+
+    # ✅ Valid case: No duplicate wires into the same port
+    valid_model = {
+        "processors": [
+            {"ID": "f", "Parent": "F", "Name": "Plant", "Ports": ["X", "U"], "Terminals": ["X"]},
+            {"ID": "g", "Parent": "G", "Name": "Controller", "Ports": ["Y"], "Terminals": ["U"]},
+            {"ID": "s", "Parent": "S", "Name": "Sensor", "Ports": ["X"], "Terminals": ["Y"]}
+        ],
+        "wires": [
+            {"ID": "w1", "Parent": "X", "Name": "State Feedback", "Source": ["f", 0], "Destination": ["g", 0]},
+            {"ID": "w2", "Parent": "U", "Name": "Action", "Source": ["g", 0], "Destination": ["f", 1]},
+            {"ID": "w3", "Parent": "Y", "Name": "Observation", "Source": ["s", 0], "Destination": ["f", 0]},
+            {"ID": "w4", "Parent": "X", "Name": "State Measurement", "Source": ["f", 0], "Destination": ["s", 0]}
+        ]
+    }
+
+    # ❌ Invalid case: Two wires into the same port
+    invalid_model = {
+        "processors": [
+            {"ID": "f", "Parent": "F", "Name": "Plant", "Ports": ["X", "U"], "Terminals": ["X"]},
+            {"ID": "g", "Parent": "G", "Name": "Controller", "Ports": ["Y"], "Terminals": ["U"]},
+        ],
+        "wires": [
+            {"ID": "w1", "Parent": "X", "Name": "State Feedback", "Source": ["f", 0], "Destination": ["g", 0]},
+            {"ID": "w2", "Parent": "X", "Name": "Duplicate Connection", "Source": ["s", 0], "Destination": ["g", 0]}  # Duplicate
+        ]
+    }
+
+    assert no_duplicate_wires_into_ports(valid_model) == True, "Test failed: Valid model should pass."
+    assert no_duplicate_wires_into_ports(invalid_model) == False, "Test failed: Invalid model should fail."
+
+    print("All duplicate wire tests passed!")
+
+if __name__ == "__main__":
+    test_no_duplicate_wires_into_ports()
