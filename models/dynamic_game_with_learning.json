@@ -162,6 +162,20 @@
             "Name": "Bob's Expected Payoff",
             "Source": ["bob_decision", 1],
             "Destination": ["bob_learner", 1]
-        }
+        },
+        {
+            "ID": "w_alice_action_feedback",
+            "Parent": "U",
+            "Name": "Alice's Action Feedback",
+            "Source": ["alice_decision", 0],
+            "Destination": ["alice_learner", 0]
+        },
+        {
+            "ID": "w_bob_action_feedback",
+            "Parent": "U",
+            "Name": "Bob's Action Feedback",
+            "Source": ["bob_decision", 0],
+            "Destination": ["bob_learner", 0]
+        }          
     ]
 }
