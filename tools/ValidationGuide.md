@@ -7,6 +7,58 @@ This document provides a clear understanding of **valid and invalid wiring confi
 - **Open Terminals** (terminals with no outgoing wires)
 
 ---
+The json for the example below
+```json
+{
+  "processors": [
+    {
+      "ID": "f",
+      "Parent": "F",
+      "Name": "Plant",
+      "Ports": ["X", "U"],
+      "Terminals": ["X"]
+    },
+    {
+      "ID": "g",
+      "Parent": "G",
+      "Name": "Controller",
+      "Ports": ["Y"],
+      "Terminals": ["U"]
+    },
+    {
+      "ID": "s",
+      "Parent": "S",
+      "Name": "Sensor",
+      "Ports": ["X"],
+      "Terminals": ["Y"]
+    }
+  ],
+  "wires": [
+    {
+      "ID": "w1",
+      "Parent": "X",
+      "Name": "State Feedback",
+      "Source": ["f", 0],
+      "Destination": ["g", 0]
+    },
+    {
+      "ID": "w2",
+      "Parent": "U",
+      "Name": "Control Signal",
+      "Source": ["g", 0],
+      "Destination": ["f", 1]
+    },
+    {
+      "ID": "w3",
+      "Parent": "Y",
+      "Name": "Sensor Feedback",
+      "Source": ["s", 0],
+      "Destination": ["g", 0]
+    }
+  ]
+}
+```
+---
 
 ## **1. Understanding Wiring in Block Diagrams**
 Each **processor** has:
