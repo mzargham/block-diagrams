@@ -314,3 +314,103 @@ def test_no_duplicate_wires_into_ports():
 
 if __name__ == "__main__":
     test_no_duplicate_wires_into_ports()
+
+def get_open_ports_and_terminals(model, only_open_terminals=False):
+    """
+    Computes all open ports and available terminals in a block diagram model.
+    
+    Open ports: Ports that do not have an incoming wire.
+    Available terminals: Terminals available for connection.
+    
+    If only_open_terminals=True, returns only terminals that have no outgoing wires.
+    
+    Args:
+        model (dict): Block diagram model.
+        only_open_terminals (bool): Whether to return only terminals that have no outgoing wires.
+    
+    Returns:
+        dict: { "open_ports": [(processor_id, port_name)], "available_terminals": [(processor_id, terminal_name)] }
+    """
+    processors = {p["ID"]: p for p in model["processors"]}
+    occupied_ports = set()  # Stores destination ports that have an incoming wire
+    used_terminals = set()  # Stores terminals that have an outgoing wire
+
+    # Step 1: Populate occupied ports and used terminals
+    for wire in model["wires"]:
+        dest_proc, dest_idx = wire["Destination"]  # Where the wire ends
+        src_proc, src_idx = wire["Source"]  # Where the wire starts
+
+        # Mark destination ports as occupied
+        if dest_proc in processors and 0 <= dest_idx < len(processors[dest_proc]["Ports"]):
+            occupied_ports.add((dest_proc, dest_idx))
+
+        # Mark source terminals as used
+        if src_proc in processors and 0 <= src_idx < len(processors[src_proc]["Terminals"]):
+            used_terminals.add((src_proc, src_idx))
+
+    # Step 2: Find open ports
+    open_ports = []
+    for proc in processors.values():
+        for idx, port_name in enumerate(proc["Ports"]):
+            if (proc["ID"], idx) not in occupied_ports:
+                open_ports.append((proc["ID"], port_name))
+
+    # Step 3: Find available terminals
+    available_terminals = []
+    for proc in processors.values():
+        for idx, terminal_name in enumerate(proc["Terminals"]):
+            if not only_open_terminals or (proc["ID"], idx) not in used_terminals:
+                available_terminals.append((proc["ID"], terminal_name))
+
+    return {
+        "open_ports": open_ports,
+        "available_terminals": available_terminals
+    }
+
+def test_get_open_ports_and_terminals():
+    """
+    Tests the get_open_ports_and_terminals function.
+    """
+
+    test_model = {
+        "processors": [
+            {"ID": "f", "Parent": "F", "Name": "Plant", "Ports": ["X", "U"], "Terminals": ["X"]},
+            {"ID": "g", "Parent": "G", "Name": "Controller", "Ports": ["Y"], "Terminals": ["U"]},
+            {"ID": "s", "Parent": "S", "Name": "Sensor", "Ports": ["X"], "Terminals": ["Y"]}
+        ],
+        "wires": [
+            {"ID": "w1", "Parent": "X", "Source": ["f", 0], "Destination": ["g", 0]},
+            {"ID": "w2", "Parent": "U", "Source": ["g", 0], "Destination": ["f", 1]},
+            {"ID": "w3", "Parent": "Y", "Source": ["s", 0], "Destination": ["g", 0]}
+        ]
+    }
+
+    # Expected Results
+    expected_open_ports = [("s", "X")]  # Port "X" on "s" has no incoming wire
+    expected_available_terminals = [("f", "X"), ("g", "U"), ("s", "Y")]  # All terminals
+
+    expected_open_terminals = [("g", "U")]  # Only terminals with no outgoing wire
+
+    result_all_terminals = get_open_ports_and_terminals(test_model)
+    result_open_terminals = get_open_ports_and_terminals(test_model, only_open_terminals=True)
+
+    # Debugging output
+    print("\n--- Debugging Output ---")
+    print("Expected Open Ports:", expected_open_ports)
+    print("Actual Open Ports:", result_all_terminals["open_ports"])
+    
+    print("Expected Available Terminals:", expected_available_terminals)
+    print("Actual Available Terminals:", result_all_terminals["available_terminals"])
+
+    print("Expected Open Terminals:", expected_open_terminals)
+    print("Actual Open Terminals:", result_open_terminals["available_terminals"])
+    print("--- End Debugging ---\n")
+
+    assert result_all_terminals["open_ports"] == expected_open_ports, "Test failed: Open ports incorrect."
+    assert result_all_terminals["available_terminals"] == expected_available_terminals, "Test failed: Available terminals incorrect."
+    assert result_open_terminals["available_terminals"] == expected_open_terminals, "Test failed: Open terminals incorrect."
+
+    print("All open port and terminal tests passed!")
+
+if __name__ == "__main__":
+    test_get_open_ports_and_terminals()
