@@ -1,7 +1,7 @@
 #we want to write a simple tester to check various properties of a block diagrams
 # are they closed loop?  Done
 # does a model satisfy the requirements of block?
-# what are their open ports? 
+# what are their open ports? Done
 # are the wires typed correctly? Done
 # do we have duplicate wires into the same port? Done
 
