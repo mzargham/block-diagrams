@@ -1,168 +1,239 @@
 # Block Validation Guide
 
-This guide explains how to validate whether a **block diagram model** satisfies the requirements of a **block**.  
-
-A **block** defines:
-- **Required input ports**: These must be fully connected.
-- **Expected output terminals**: The model should provide these terminals.
-
-The function `model_satisfies_block()` performs this validation and ensures:
-1. All **required ports** are **connected**.
-2. The **expected terminals** are **available**.
-3. (Optionally) The expected terminals are **open** (not just available).
+This guide explains how to determine whether a **block diagram model** can serve as a **valid substitute** for a block pattern.
 
 ---
 
-## **1. Block and Model Definitions**
-### **Processors (Blocks)**
-Each **block** has:
-- **Ports (inputs)** → Must receive a wire connection.
-- **Terminals (outputs)** → Send signals via wires.
+## **1. Overview**
+A **Block** defines an **abstract pattern** with:
+- **Domain (inputs, from specific spaces)** → These must be fully supported.
+- **Codomain (outputs, from specific spaces)** → The model must provide these outputs.
 
-### **Wires**
-- **Source:** Comes from a terminal.
-- **Destination:** Goes into a port.
+A **Processor** is a **specific implementation** of a block, but **a subsystem composed of multiple processors could also satisfy a block**.
 
----
-
-## **2. Valid and Invalid Model Configurations**
-### ✅ **Valid Model (Satisfies Block)**
-A model **satisfies a block** if:
-- **All required ports are connected.**
-- **All expected terminals are available.**
-- *(Optional)* If required, expected terminals must be **open** (unused).
-
-| **Wire ID** | **Source Processor (Terminal)** | **Destination Processor (Port)** | **Valid?** | **Reason** |
-|------------|--------------------------------|---------------------------------|----------|----------|
-| `w1` | `game.Observation` | `controller.Observation` | ✅ Yes | **Ports are connected** |
-| `w2` | `controller.Action` | `game.Action` | ✅ Yes | **Valid input connection** |
-| `w3` | `some_source.State` | `game.State` | ✅ Yes | **Provides necessary input** |
-
-### ❌ **Invalid Model (Fails Block Validation)**
-A model **fails validation** if:
-- **A required port is unconnected.**
-- **An expected terminal is missing.**
-
-| **Wire ID** | **Source Processor (Terminal)** | **Destination Processor (Port)** | **Valid?** | **Reason** |
-|------------|--------------------------------|---------------------------------|----------|----------|
-| `w4` | `game.Observation` | *(None)* | ❌ No | **Terminal is missing** |
-| `w5` | `controller.Action` | *(None)* | ❌ No | **Port is unconnected** |
-| `w6` | *(None)* | `game.State` | ❌ No | **State port is unconnected** |
+### **Substitutability Test**
+💡 **Can this model be used in place of a processor that directly implements the block?**
 
 ---
 
-## **3. Open Ports and Available Terminals**
-| **Category** | **Definition** | **Example Values** |
-|-------------|--------------|------------------|
-| **Open Ports** | Ports **with no incoming wires** | `[('game', 'State')]` |
-| **Available Terminals** | **All terminals** (multiple wires can originate) | `[('game', 'Observation'), ('controller', 'Action')]` |
-| **Open Terminals** | Terminals **with no outgoing wires** | `[]` |
+## **2. The Two Block Patterns**
+| **Block Name**   | **Inputs (Domain)** | **Outputs (Codomain)** |
+|----------------|----------------|-----------------|
+| **`open_game`** | `["U", "U"]`  | `["Y", "Y"]` |
+| **`closed_game`** | `[]`  | `["Y", "Y"]` |
 
-- **Ports must receive connections.** Open ports indicate **an invalid model**.
-- **Terminals can be used multiple times.** Available terminals do **not** mean an invalid model.
-- **Open terminals are optional.** Some blocks may require **specific terminals to remain open**.
-
----
-
-## **4. Function Usage**
-### **Function: `model_satisfies_block()`**
-```python
-def model_satisfies_block(model, block, require_open_terminals=False):
-    """
-    Checks whether a given model satisfies the requirements of a block.
-
-    Args:
-        model (dict): The block diagram model to check.
-        block (dict): The block to validate against.
-        require_open_terminals (bool): If True, expected terminals must be open (not just available).
-
-    Returns:
-        bool: True if the model satisfies the block, False otherwise.
-    """
-```
-
-### **Example Usage**
-#### ✅ **Check if `dynamic_game_model` satisfies the `game` block**
-```python
-satisfies = model_satisfies_block(dynamic_game_model, game_block)
-print(satisfies)  # True if valid, False otherwise
-```
-
-#### ✅ **Check if `game` block requires its terminals to be open**
-```python
-satisfies_open = model_satisfies_block(dynamic_game_model, game_block, require_open_terminals=True)
-print(satisfies_open)  # False if terminals are used
-```
-
----
-
-## **5. Example JSON Model**
-This JSON model (`dynamic_game_model.json`) represents a **valid game system**.
-
+### **Block Definitions**
+#### **📝 `open_game.json`**
 ```json
 {
-  "processors": [
-    {
-      "ID": "game",
-      "Parent": "GameSystem",
-      "Name": "Game Processor",
-      "Ports": ["State", "Action"],
-      "Terminals": ["Observation"]
-    },
-    {
-      "ID": "controller",
-      "Parent": "Controller",
-      "Name": "Agent",
-      "Ports": ["Observation"],
-      "Terminals": ["Action"]
-    }
-  ],
-  "wires": [
-    {
-      "ID": "w1",
-      "Parent": "State",
-      "Source": ["game", 0],
-      "Destination": ["controller", 0]
-    },
-    {
-      "ID": "w2",
-      "Parent": "Action",
-      "Source": ["controller", 0],
-      "Destination": ["game", 1]
-    },
-    {
-      "ID": "w3",
-      "Parent": "State",
-      "Source": ["some_source", 0],
-      "Destination": ["game", 0]
-    }
-  ]
+  "ID": "open_game",
+  "Name": "Open Game",
+  "Description": "A game that accepts player actions and produces payoffs.",
+  "Domain": ["U", "U"],
+  "Codomain": ["Y", "Y"]
+}
+```
+#### **📝 `closed_game.json`**
+```json
+{
+  "ID": "closed_game",
+  "Name": "Closed Game",
+  "Description": "A game where players' policies are included, requiring no external inputs.",
+  "Domain": [],
+  "Codomain": ["Y", "Y"]
 }
 ```
 
 ---
 
-## **6. Summary**
-✅ **A model satisfies a block if:**
-- All **required ports are connected**.
-- All **expected terminals are available**.
-- *(Optional)* If required, expected terminals are **open**.
+## **3. Four Example Models**
+Each of these models will be tested against either `open_game` or `closed_game`.
 
-✅ **Use `model_satisfies_block()` to check validation.**
-- **`require_open_terminals=False`** → Default, terminals must exist.
-- **`require_open_terminals=True`** → Terminals must be **unused**.
-
-✅ **Check your model JSON carefully before assuming failure!**
-- The function works **correctly**, but a model **missing required wires** will fail validation.
+| **Type**         | **Matches `open_game`?** | **Matches `closed_game`?** |
+|----------------|----------------------|---------------------------|
+| **Simple Open Game**  | ✅ **Valid Substitute** | ❌ **Invalid** |
+| **Detailed Open Game** | ✅ **Valid Substitute** | ❌ **Invalid** |
+| **Simple Closed Game** | ❌ **Invalid** | ✅ **Valid Substitute** |
+| **Detailed Closed Game** | ❌ **Invalid** | ✅ **Valid Substitute** |
 
 ---
 
-## **7. Debugging Failed Validations**
-If a model **fails validation**, print debugging information:
-```python
-result = model_satisfies_block(dynamic_game_model, game_block)
-if not result:
-    print("❌ Model does NOT satisfy block!")
-else:
-    print("✅ Model satisfies block!")
+## **4. Example JSON Models**
+### **📝 Model 1: Simple Open Game (✅ Valid for `open_game`)**
+A **single `Game` processor** implementing `open_game`.
+
+```json
+{
+  "processors": [
+    {
+      "ID": "game_instance",
+      "Parent": "Game",
+      "Name": "Simple Game",
+      "Ports": ["U", "U"],
+      "Terminals": ["Y", "Y"]
+    }
+  ]
+}
 ```
+✅ **Matches `open_game`** because:
+- It has **exactly** the required inputs and outputs.
+
+---
+
+### **📝 Model 2: Detailed Open Game (✅ Valid for `open_game`)**
+A **stateful game (`dynamic_game_model`) implementing `open_game`**.
+
+```json
+{
+  "processors": [
+    {
+      "ID": "dynamics",
+      "Parent": "F",
+      "Name": "Game Dynamics",
+      "Ports": ["X", "U"],
+      "Terminals": ["X"]
+    },
+    {
+      "ID": "sensor",
+      "Parent": "S",
+      "Name": "Game Sensor",
+      "Ports": ["X"],
+      "Terminals": ["Y"]
+    }
+  ],
+  "wires": [
+    {
+      "ID": "w1",
+      "Parent": "U",
+      "Source": ["dynamics", 1],
+      "Destination": ["sensor", 0]
+    }
+  ]
+}
+```
+✅ **Matches `open_game`** because:
+- Despite using state (`X`), it **still has two `U` inputs and two `Y` outputs**.
+
+---
+
+### **📝 Model 3: Simple Closed Game (✅ Valid for `closed_game`)**
+A **single `Game` processor**, but **with policies included**.
+
+```json
+{
+  "processors": [
+    {
+      "ID": "game_instance",
+      "Parent": "Game",
+      "Name": "Simple Game",
+      "Ports": ["U", "U"],
+      "Terminals": ["Y", "Y"]
+    },
+    {
+      "ID": "policy_1",
+      "Parent": "G",
+      "Name": "Player 1 Policy",
+      "Ports": ["Y"],
+      "Terminals": ["U"]
+    },
+    {
+      "ID": "policy_2",
+      "Parent": "G",
+      "Name": "Player 2 Policy",
+      "Ports": ["Y"],
+      "Terminals": ["U"]
+    }
+  ],
+  "wires": [
+    {
+      "ID": "w1",
+      "Parent": "U",
+      "Source": ["policy_1", 0],
+      "Destination": ["game_instance", 0]
+    },
+    {
+      "ID": "w2",
+      "Parent": "U",
+      "Source": ["policy_2", 0],
+      "Destination": ["game_instance", 1]
+    }
+  ]
+}
+```
+✅ **Matches `closed_game`** because:
+- The policies **remove external inputs (`U`)**, making it self-contained.
+
+---
+
+### **📝 Model 4: Detailed Closed Game (✅ Valid for `closed_game`)**
+The **dynamic game, but with policies included**, making it self-contained.
+
+```json
+{
+  "processors": [
+    {
+      "ID": "dynamics",
+      "Parent": "F",
+      "Name": "Game Dynamics",
+      "Ports": ["X", "U"],
+      "Terminals": ["X"]
+    },
+    {
+      "ID": "sensor",
+      "Parent": "S",
+      "Name": "Game Sensor",
+      "Ports": ["X"],
+      "Terminals": ["Y"]
+    },
+    {
+      "ID": "policy_1",
+      "Parent": "G",
+      "Name": "Player 1 Policy",
+      "Ports": ["Y"],
+      "Terminals": ["U"]
+    },
+    {
+      "ID": "policy_2",
+      "Parent": "G",
+      "Name": "Player 2 Policy",
+      "Ports": ["Y"],
+      "Terminals": ["U"]
+    }
+  ],
+  "wires": [
+    {
+      "ID": "w1",
+      "Parent": "U",
+      "Source": ["policy_1", 0],
+      "Destination": ["dynamics", 1]
+    },
+    {
+      "ID": "w2",
+      "Parent": "U",
+      "Source": ["policy_2", 0],
+      "Destination": ["dynamics", 1]
+    },
+    {
+      "ID": "w3",
+      "Parent": "Y",
+      "Source": ["sensor", 0],
+      "Destination": ["policy_1", 0]
+    },
+    {
+      "ID": "w4",
+      "Parent": "Y",
+      "Source": ["sensor", 1],
+      "Destination": ["policy_2", 0]
+    }
+  ]
+}
+```
+✅ **Matches `closed_game`** because:
+- The policies **remove external inputs (`U`)**, making it self-contained.
+
+---
+
+### **5. Summary**
+✅ **A model satisfies a block if:**
+- It **accepts the required inputs** (or none, for `closed_game`).
+- It **produces the required outputs**.
